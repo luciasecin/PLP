@@ -59,3 +59,71 @@ partir l = [(xs1,xs2) | x <- [0..(length l)],
 
 partirCheta :: [a] -> [([a], [a])]
 partirCheta l = [(take x l, drop x l) | x <- [0..(length l)]]
+
+-- Ejercicio 7
+listasQueSuman :: Int -> [[Int]]
+listasQueSuman 0 = [[]]
+listasQueSuman n = [(x:xs) | x <- [1..n], xs <- listasQueSuman (n-x)]
+
+--listas que suman 3
+-- lQS(1) = [1]
+-- lQS(2) = [1:lQS(1), 2:lQS(0)] = [[1,1], [2]]
+-- lQS(3) = [1:lQS(2), 2:lQS(1), 3:lQS(0)] = [[1,1,1], [1,2], [2,1], [3]]
+-- lQS(4) = [1:lQS(3), 2:lQS(2), 3:lQS(1), 4:lqs(0)] = [[1,1,1,1], [1,1,2], [1,2,1], [1,3], [2,1,1], [2,2], [3,1], [4]]
+
+-- Ejercicio 8
+listasEnterosPositivos = concat [listasQueSuman x | x <- [1..]]
+
+-- Ejercicio 9
+-- foldr: it takes the second argument and the last item of the list and applies the function, 
+-- then it takes the penultimate item from the end and the result, and so on.
+
+-- Input: foldr (/) 2 [8,12,24,4]
+-- Output: 8.0
+-- hace 4/2 = 2 --> 24/2 --> 12/12 --> 8/1 --> 8 = 8/(12/(24/(4/2)))
+
+-- sumFold = foldr (+) 0 directo en consola funciona pero si lo queres compilar tenes que poner el tipo sino llora
+sumFold :: (Num a) => [a] -> a
+sumFold = foldr (+) 0
+-- este si compila sin el tipo, no llora
+elemFold n = foldr (\x r-> x == n || r) False
+masmas l1 l2 = foldr (\x r -> x:r) l2 l1
+filterFold p = foldr (\x r -> if (p x) then x:r else r) []
+mapFold f = foldr (\x r -> (f x):r) []
+masmas2 l1 l2 = foldr (:) l2 l1
+
+mejorSegunFold :: (a -> a -> Bool) -> [a] -> a
+mejorSegunFold p = foldr1 (\x r -> if p x r then x else r)
+
+-- foldl TIENE LOS ARGUMENTOS AL REVES LA FUNCION
+sumasParciales :: Num a => [a] -> [a]
+sumasParciales l = tail (foldl (\r x -> r ++ [x + last r]) [0] l)
+
+sumasParciales2 :: Num a => [a] -> [a]
+sumasParciales2 = foldr (\x r -> x:(map (+x) r)) []
+
+sumaAlt :: Num a => [a] -> a
+sumaAlt = foldr (\x r -> x - r) 0
+
+sumaAltInv :: Num a => [a] -> a
+sumaAltInv = foldl (\r x -> x - r) 0
+
+sumaAltInv2 = sumaAlt . reverse
+
+meteEnElMedio n l = [take x l ++ n:(drop x l) | x <- [0..(length l)]]
+
+permutaciones ::[a] -> [[a]]
+permutaciones = foldr (\x r -> concatMap (\l -> meteEnElMedio x l) r) [[]]
+
+-- Ejercicio 10
+partes :: [a] -> [[a]]
+partes = foldr (\x r -> (map (\l -> x:l) r) ++ r) [[]]
+
+prefijos :: [a] -> [[a]]
+prefijos = foldl (\r x -> ((head r)++[x]):r) [[]]
+
+sufijos :: [a] -> [[a]]
+sufijos = foldr (\x r -> (x:head r):r) [[]]
+
+sublistas :: [a] -> [[a]]
+sublistas l = [] : filter (not.null) (concatMap prefijos (sufijos l))
