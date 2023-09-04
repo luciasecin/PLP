@@ -127,3 +127,23 @@ sufijos = foldr (\x r -> (x:head r):r) [[]]
 
 sublistas :: [a] -> [[a]]
 sublistas l = [] : filter (not.null) (concatMap prefijos (sufijos l))
+
+-- Ejercicio 11
+
+-- Ejercicio 12
+recr :: (a -> [a] -> b -> b) -> b -> [a] -> b
+recr _ z [] = z
+recr f z (x:xs) = f x xs (recr f z xs)
+
+sacarUna :: Eq a => a -> [a] -> [a]
+sacarUna e = recr (\x xs r -> if x == e then xs else x:r) []
+
+-- foldr no sire para este esquema porque necesito tener la original, foldr no me dejaria hacer la comparacion con 
+-- una sola aparicion, lo hace con todas, por que sacaria todas las apariciones de un elemento. Con recr, tengo acceso
+-- a la original ademas de la recursiva.
+
+sacarTodas :: Eq a => a -> [a] -> [a]
+sacarTodas e = foldr (\x r -> if x == e then r else x:r) []
+
+insertarOrdenado :: Ord a => a -> [a] -> [a]
+insertarOrdenado e = recr (\x xs r -> if x < e then (if r == [] then [x,e] else x:r) else e:x:xs) []
