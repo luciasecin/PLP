@@ -130,6 +130,47 @@ sublistas l = [] : filter (not.null) (concatMap prefijos (sufijos l))
 
 -- Ejercicio 11
 
+-- la estructural es foldr, la global es recr. La global la uso cuando me falta info, cuando necesito mas que solo los
+-- elementos para hacer la recursion. DUDOSA AFIRMACION DUDOSISIMA. BUSCAR LO DE FIBONACCI EN LOGICA? PREGUNTAR A PAU?
+-- A GALI? A TEO?
+
+elementosEnPosicionesPares :: [a] -> [a]
+elementosEnPosicionesPares [] = []
+elementosEnPosicionesPares (x:xs) = if null xs then [x] else x:elementosEnPosicionesPares (tail xs)
+
+-- esta no la puedo hacer con recursion estructural, requiere usar recursion global, no puedo hacer recursion estructural
+-- porque se va saltando numeros y la informacion queda mal si hago recursion estructural. Ejemplo:
+-- tengo la lista [1,2,3,4,5,6] -> el resultado que quiero es [1,3,5], pero siguiendo un esquema de recursion estructural
+-- las cosas me van a dar mal, porque voy a estar usando el elemeto actual y queriendolo concatenar con el resultado
+-- de la recursion en el resto de la lista, es decir:
+-- foldr (\x r -> x:r) no sirve porque daria 1:[2,4,6] que son las posiciones pares de la lista [2,3,4,5,6]
+-- por ende el resultado da mal, deberia tener una manera de saber si es o no par. cuestion, necesito induccion global
+
+entrelazar :: [a] -> [a] -> [a]
+entrelazar [] = id
+entrelazar (x:xs) = \ys -> if null ys then x:(entrelazar xs []) else x:head ys:entrelazar xs (tail ys)
+
+-- esta si la puedo hacer haciendo recursion estructural
+entrelazar2 :: [a] -> [a] -> [a]
+entrelazar2 = foldr extender id
+        where extender = (\x r l -> if null l then x:(r []) else x:head l:(r (tail l))) 
+
+-- EJEMPLO: entrelazar2 [1,2,3] [A,B,C] = (foldr extender id [1,2,3]) [A,B,C]
+
+-- PASO 1 -> extender toma la x, la r que es una funcion y la segunda lista 
+-- extender 1 (extender 2 (extender 3 id)) [A,B,C] = if null [A,B,C] then 1:(extender 2 (extender 3 id)) []) 
+--                                                     else 1:A:((extender 2 (extender 3 id)) [B,C])
+
+-- Hasta ahora tenemos 1:A:((extender 2 (extender 3 id)) [B,C])
+-- PASO 2 -> la recursion del resultado del paso 1: extender 2 (extender 3 id)) [B,C]
+-- extender 2 (extender 3 id) [B,C] = if null [B,C] then 2:((extender 3 id) []) else 2:B:((extender 3 id) [C])
+
+-- Ahora tenemos 1:A:2:B:((extender 3 id) [C])
+-- PASO 3 -> la recursion del resultado del paso 2: extender 3 id [C]
+-- extender 3 id [C] = if null [C] then 3:(id [C]) else 3:C:(id []))
+
+-- Finalmente queda 1:A:2:B:3:C:[] = [1,A,2,B,3,C]
+
 -- Ejercicio 12
 recr :: (a -> [a] -> b -> b) -> b -> [a] -> b
 recr _ z [] = z
@@ -138,7 +179,7 @@ recr f z (x:xs) = f x xs (recr f z xs)
 sacarUna :: Eq a => a -> [a] -> [a]
 sacarUna e = recr (\x xs r -> if x == e then xs else x:r) []
 
--- foldr no sire para este esquema porque necesito tener la original, foldr no me dejaria hacer la comparacion con 
+-- foldr no sirve para este esquema porque necesito tener la original, foldr no me dejaria hacer la comparacion con 
 -- una sola aparicion, lo hace con todas, por que sacaria todas las apariciones de un elemento. Con recr, tengo acceso
 -- a la original ademas de la recursiva.
 
@@ -147,3 +188,12 @@ sacarTodas e = foldr (\x r -> if x == e then r else x:r) []
 
 insertarOrdenado :: Ord a => a -> [a] -> [a]
 insertarOrdenado e = recr (\x xs r -> if x < e then (if r == [] then [x,e] else x:r) else e:x:xs) []
+
+-- para hacer las listas que suman 4, tengo que agregarle el 1 a las que suman 3, el 2 a las que suman 2, el 3 a las que
+-- suman 4 y el 4 a las que suman 0
+-- no se man, creo que no, no se me ocurre manera de hacerlo.
+
+
+
+
+
